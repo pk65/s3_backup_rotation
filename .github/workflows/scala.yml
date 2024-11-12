@@ -12,7 +12,7 @@ on:
     branches: [ "main" ]
 
 env:
-  ARTIFACT: s3_backup_rotation-0.1.0-SNAPSHOT.zip
+  ARTIFACT: s3_backup_rotation-0.1.0-SNAPSHOT
 
 permissions:
   contents: read
@@ -36,16 +36,16 @@ jobs:
       run: |
         sbt "Universal / packageBin"
         cd target/universal
-        sha256sum --binary $ARTIFACT $ARTIFACT.sha256 > $ARTIFACT.sha256
+        sha256sum --binary $ARTIFACT.zip > ../../$ARTIFACT.zip.sha256
         cd ../../
-        ln -s target/universal/$ARTIFACT $ARTIFACT
+        ln -s target/universal/$ARTIFACT.zip $ARTIFACT.zip
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: $ARTIFACT
+        name: ${{ env.ARTIFACT }}
         path: |
-          $ARTIFACT
-          $ARTIFACT.sha256
+          ${{ env.ARTIFACT }}.zip
+          ${{ env.ARTIFACT }}.zipsha256
         if-no-files-found: error
         compression-level: 0
         retention-days: 7

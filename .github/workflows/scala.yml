@@ -29,6 +29,18 @@ jobs:
         cache: 'sbt'
     - name: Run tests
       run: sbt test
-      # Optional: This step uploads information to the GitHub dependency graph and unblocking Dependabot alerts for the repository
-    - name: Upload dependency graph
-      uses: scalacenter/sbt-dependency-submission@ab086b50c947c9774b70f39fc7f6e20ca2706c91
+    - name: Build installer
+      run: |
+        sbt "Universal / packageBin"
+        echo ${{ hashFiles('**/s3_backup_rotation-0.1.0-SNAPSHOT.zip') }} > s3_backup_rotation-0.1.0-SNAPSHOT.zip.sha256
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: s3_backup_rotation-0.1.0-SNAPSHOT
+        path: |
+          target/universal/s3_backup_rotation-0.1.0-SNAPSHOT.zip
+          s3_backup_rotation-0.1.0-SNAPSHOT.zip.sha256
+        if-no-files-found: error
+        compression-level: 0
+        retention-days: 7
+

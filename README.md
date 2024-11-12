@@ -19,7 +19,7 @@ run --dry-run --profile default --bucket service-backup --prefix backup.daily --
 ## Universal packager
 
 ```shell
-sbt universal:packageBin
+sbt "Universal / packageBin"
 ```
 
 Unpack the package and run the app:

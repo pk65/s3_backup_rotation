@@ -1,0 +1,50 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Scala CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  ARTIFACT: s3_backup_rotation-0.1.0-SNAPSHOT
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 11
+      uses: actions/setup-java@v4
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+    - name: Run tests
+      run: sbt test
+    - name: Build installer
+      run: |
+        sbt "Universal / packageBin"
+        cd target/universal
+        sha256sum --binary $ARTIFACT.zip > ../../$ARTIFACT.zip.sha256
+        cd ../../
+        ln -s target/universal/$ARTIFACT.zip $ARTIFACT.zip
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.ARTIFACT }}
+        path: |
+          ${{ env.ARTIFACT }}.zip
+          ${{ env.ARTIFACT }}.zip.sha256
+        if-no-files-found: error
+        compression-level: 0
+        retention-days: 7

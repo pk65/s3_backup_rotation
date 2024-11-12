@@ -38,12 +38,6 @@ jobs:
         sha256sum --binary $ARTIFACT.zip > ../../$ARTIFACT.zip.sha256
         cd ../../
         ln -s target/universal/$ARTIFACT.zip $ARTIFACT.zip
-    - name: Publish Test Results
-      uses: EnricoMi/publish-unit-test-result-action@v2
-      if: always()
-      with:
-        files: |
-          target/test-reports/**/*.xml
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:

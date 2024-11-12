@@ -11,6 +11,9 @@ on:
   pull_request:
     branches: [ "main" ]
 
+env:
+  ARTIFACT: s3_backup_rotation-0.1.0-SNAPSHOT.zip
+
 permissions:
   contents: read
 
@@ -32,14 +35,17 @@ jobs:
     - name: Build installer
       run: |
         sbt "Universal / packageBin"
-        echo ${{ hashFiles('**/s3_backup_rotation-0.1.0-SNAPSHOT.zip') }} > s3_backup_rotation-0.1.0-SNAPSHOT.zip.sha256
+        cd target/universal
+        sha256sum --binary $ARTIFACT $ARTIFACT.sha256 > $ARTIFACT.sha256
+        cd ../../
+        ln -s target/universal/$ARTIFACT $ARTIFACT
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: s3_backup_rotation-0.1.0-SNAPSHOT
+        name: $ARTIFACT
         path: |
-          target/universal/s3_backup_rotation-0.1.0-SNAPSHOT.zip
-          s3_backup_rotation-0.1.0-SNAPSHOT.zip.sha256
+          $ARTIFACT
+          $ARTIFACT.sha256
         if-no-files-found: error
         compression-level: 0
         retention-days: 7
